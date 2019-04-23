@@ -1,0 +1,24 @@
+{
+  "name": "Analogy",
+  "version": "0.0.1",
+  "description": "Simple note-taking prototype built on top of PTRN.",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config ./src/webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/supersystemic/PTRN.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/supersystemic/PTRN/issues"
+  },
+  "homepage": "https://github.com/supersystemic/PTRN#readme",
+  "dependencies": {
+    "mithril": "^1.1.6",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  }
+}
