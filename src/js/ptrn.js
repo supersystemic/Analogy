@@ -34,6 +34,17 @@ function relate(typeid, aid, bid){
     })
 }
 
+function reorder(typeid, aid, oldpos, newpos){
+    return request("reorder", {
+        typeid, aid, oldpos, newpos
+    }).then(ob=>{
+        if(ob.executed === false){
+            throw ob.error
+        }
+        return ob.answer
+    })
+}
+
 function get(id){
     return request("get", {id}).then(ob=>{
         if(ob.executed === false){
@@ -44,5 +55,5 @@ function get(id){
 }
 
 module.exports = {
-    create, relate, get
+    create, relate, reorder, get
 }

@@ -43,11 +43,28 @@ ptrn.get(p.bootstrap).then(ob=>{
 const Obj = {
     view: function(vnode) {
         let ob = vnode.attrs.ob
-        return m(".object",[
+        let pos = vnode.attrs.pos
+
+        return m(".object",{
+            draggable: true,
+            ondragstart: ev=>{
+                ev.dataTransfer.setData("pos", pos)
+            },
+            ondrop: ev=>{
+                ev.preventDefault();
+                let opos = ev.dataTransfer.getData("pos")
+                ptrn.reorder(p.part, view_set.id, opos, pos)
+                    .then(o=> ptrn.get(view_set.id))
+                    .then(o=> view_set = o)
+            },
+            ondragover: ev=> {
+                ev.preventDefault()
+            }
+        },[
             m(".object_value",ob.value),
             m(".object_children", [
-                mapRelation(ob,p.part, other=>{
-                    return m(Obj,{ob: other})
+                mapRelation(ob,p.part, (other, pos)=>{
+                    return m(Obj,{ob: other, pos})
                 }),
                 m("button",{
                     onclick: e => {
@@ -82,8 +99,8 @@ const App = {
             },"+"),
 
             m(".objects",[
-                (view_set && view_set.relations && view_set.relations[p.part]) ? view_set.relations[p.part].values.map(ob=>{
-                    return m(Obj,{ob})
+                (view_set && view_set.relations && view_set.relations[p.part]) ? view_set.relations[p.part].values.map((ob,pos)=>{
+                    return m(Obj,{ob,pos})
                 }) : []
             ])
         ])
