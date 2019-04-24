@@ -4,6 +4,13 @@ const ptrn = require('./ptrn')
 let input_box = ""
 let view_set
 
+function mapRelation(ob, rel, callback){
+    if (typeof ob === 'undefined') return []
+    if(typeof ob.relations === 'undefined') return []
+    if(typeof ob.relations[rel] === 'undefined') return []
+    return ob.relations[rel].values.map(callback)
+}
+
 //build a library of utility values from bootstrapping point
 let p = {
     bootstrap: 0,
@@ -33,7 +40,29 @@ ptrn.get(p.bootstrap).then(ob=>{
     }
 })
 
+const Obj = {
+    view: function(vnode) {
+        let ob = vnode.attrs.ob
+        return m(".object",[
+            m(".object_value",ob.value),
+            m(".object_children", [
+                mapRelation(ob,p.part, other=>{
+                    return m(Obj,{ob: other})
+                }),
+                m("button",{
+                    onclick: e => {
+                        ptrn.create(input_box)
+                            .then(o=> ptrn.relate(p.part, ob.id, o.id))
+                            .then(o=> ptrn.get(view_set.id))
+                            .then(o=> view_set = o)
+                        input_box = ""
+                    }
+                },"+"),
+            ]),
 
+        ])
+    }
+}
 
 const App = {
     view: function() {
@@ -45,16 +74,16 @@ const App = {
             m("button",{
                 onclick: e => {
                     ptrn.create(input_box)
-                        .then(ob=> ptrn.relate(p.part, view_set.id, ob.id))
-                        .then(ob=> ptrn.get(view_set.id))
-                        .then(ob=> view_set = ob)
+                        .then(o=> ptrn.relate(p.part, view_set.id, o.id))
+                        .then(o=> ptrn.get(view_set.id))
+                        .then(o=> view_set = o)
                     input_box = ""
                 }
             },"+"),
 
             m(".objects",[
-                (view_set && view_set.relations[p.part]) ? view_set.relations[p.part].values.map(ob=>{
-                    return m(".object",ob.value)
+                (view_set && view_set.relations && view_set.relations[p.part]) ? view_set.relations[p.part].values.map(ob=>{
+                    return m(Obj,{ob})
                 }) : []
             ])
         ])
