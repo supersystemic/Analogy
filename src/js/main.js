@@ -2,25 +2,38 @@ const m = require('mithril')
 const ptrn = require('./ptrn')
 
 let input_box = ""
+let view_set
 
-let part_rel = 1
-let root_group = 2
+//build a library of utility values from bootstrapping point
+let p = {
+    bootstrap: 0,
+    part: 1,
+}
 
-ptrn.get(1).then(ob=>{
-    if (ob.executed===false){
-        ptrn.create("part").then(ob=>part_rel = ob.id).then(_=>{
-            ptrn.create("root").then(ob=>root_group = ob.id)
+ptrn.get(p.bootstrap).then(ob=>{
+    ob.relations[p.part].values.forEach(r=>{
+        p[r.value] = r.id
+    })
+    console.log(p)
+}).then(_=>{
+
+    //load up the document if it doesn't exist
+    if(p.document === undefined) {
+        ptrn.create("document").then(ob=>{
+            p.document = ob.id
+            ptrn.relate(p.part, p.bootstrap, p.document)
+            view_set = ob
         })
-
+    } else {
+        //load up the document if it doesn't exist
+        ptrn.get(p.document).then(ob=>{
+            view_set = ob
+            console.log(view_set)
+        })
     }
 })
 
-let view_group
 
-ptrn.get(root_group).then(ob=>{
-    view_group = ob
-    console.log(ob)
-})
 
 const App = {
     view: function() {
@@ -31,25 +44,16 @@ const App = {
             }),
             m("button",{
                 onclick: e => {
-                    ptrn.create(input_box).then(ob=>{
-                        ptrn.relate({
-                            aid: root_group,
-                            bid: ob.id,
-                            typeid: part_rel
-                        }).then(_=>{
-                            ptrn.get(root_group).then(ob=>{
-                                view_group = ob
-                                console.log(ob)
-                            })
-                        })
-                    })
+                    ptrn.create(input_box)
+                        .then(ob=> ptrn.relate(p.part, view_set.id, ob.id))
+                        .then(ob=> ptrn.get(view_set.id))
+                        .then(ob=> view_set = ob)
                     input_box = ""
-
                 }
             },"+"),
 
             m(".objects",[
-                (view_group && view_group.answer) ? view_group.answer.relations[0].values.map(ob=>{
+                (view_set && view_set.relations[p.part]) ? view_set.relations[p.part].values.map(ob=>{
                     return m(".object",ob.value)
                 }) : []
             ])

@@ -23,14 +23,24 @@ function create(value){
     })
 }
 
-function relate(params){
-    return request("relate", params).then(ob=>{
+function relate(typeid, aid, bid){
+    return request("relate", {
+        typeid, aid, bid
+    }).then(ob=>{
+        if(ob.executed === false){
+            throw ob.error
+        }
         return ob.answer
     })
 }
 
 function get(id){
-    return request("get", {id})
+    return request("get", {id}).then(ob=>{
+        if(ob.executed === false){
+            throw ob.error
+        }
+        return ob.answer
+    })
 }
 
 module.exports = {
